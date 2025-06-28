@@ -1,0 +1,31 @@
+<?xml version="1.0"?>
+<package format="2">
+  <name>three_wheel_track</name>
+  <version>0.0.1</version>
+  <description>
+    3-wheel robot controllers (kinematic, LQR, MPC) for Gazebo simulation.
+  </description>
+
+  <maintainer email="yagnadatta@example.com">Yagnadatta</maintainer>
+  <author     email="yagnadatta@example.com">Yagnadatta</author>
+
+  <license>MIT</license>
+
+  <!-- project URLs -->
+  <url type="repository">https://github.com/mathi0405/Assignment.git</url>
+  <url type="website">http://wiki.ros.org/three_wheel_track</url>
+
+  <!-- build tools -->
+  <buildtool_depend>catkin</buildtool_depend>
+
+  <!-- core dependencies -->
+  <depend>rospy</depend>
+  <depend>geometry_msgs</depend>
+  <depend>nav_msgs</depend>
+  <depend>gazebo_ros</depend>
+  <depend>xacro</depend>
+  <depend>tf</depend>
+  <depend>controller_manager</depend>
+  <depend>ros_control</depend>
+</package>
+

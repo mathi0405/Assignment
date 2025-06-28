@@ -1,0 +1,96 @@
+<launch>
+  <!--——————————————————————————————————————————————————————————————————————-->
+  <!-- 1) User-configurable arguments (goal pose & controller gains) -->
+  <arg name="x_goal"   default="0.0"/>
+  <arg name="y_goal"   default="1.0"/>
+  <arg name="yaw_goal" default="3.1416"/>
+
+  <arg name="k_rho"    default="0.5"/>
+  <arg name="k_alpha"  default="1.5"/>
+  <arg name="k_beta"   default="-0.3"/>
+  <!--——————————————————————————————————————————————————————————————————————-->
+
+  <!--——————————————————————————————————————————————————————————————————————-->
+  <!-- 2) Start Gazebo empty world -->
+  <include file="$(find gazebo_ros)/launch/empty_world.launch">
+  <arg name="use_sim_time" value="true"/>
+  </include>
+  <param name="use_sim_time" value="true"/>
+  <!--——————————————————————————————————————————————————————————————————————-->
+
+  <!--——————————————————————————————————————————————————————————————————————-->
+  <!-- 3) Load your robot description via Xacro -->
+  <param name="robot_description"
+         command="$(find xacro)/xacro $(find three_wheel_track)/urdf/three_wheel_robot.urdf.xacro"/>
+  <!--——————————————————————————————————————————————————————————————————————-->
+
+  <!--——————————————————————————————————————————————————————————————————————-->
+  <!-- 4) Spawn your three-wheel robot -->
+  <node pkg="gazebo_ros" type="spawn_model" name="spawn_bot" output="screen"
+        args="-param robot_description
+              -urdf
+              -model three_wheel_bot
+              -x 0 -y 0 -z 0.1"/>
+  <!--——————————————————————————————————————————————————————————————————————-->
+
+  <!--——————————————————————————————————————————————————————————————————————-->
+  <!-- 5) Spawn the green goal sphere at the target pose -->
+  <node pkg="gazebo_ros" type="spawn_model" name="spawn_goal" output="screen"
+        args="
+          -file $(find three_wheel_track)/models/goal_model/model.sdf
+          -sdf
+          -model goal_marker
+          -x $(arg x_goal)
+          -y $(arg y_goal)
+          -z 0.1
+        "/>
+  <!--——————————————————————————————————————————————————————————————————————-->
+
+  <!--——————————————————————————————————————————————————————————————————————-->
+  <!-- 6) Launch your kinematic controller, passing in goal & gains -->
+  <!--<node pkg="three_wheel_track"
+        type="kinematic_controller_node.py"
+        name="kinematic_controller"
+        output="screen">
+    <param name="x_ref"   value="$(arg x_goal)"/>
+    <param name="y_ref"   value="$(arg y_goal)"/>
+    <param name="yaw_ref" value="$(arg yaw_goal)"/>
+
+    <param name="k_rho"   value="$(arg k_rho)"/>
+    <param name="k_alpha" value="$(arg k_alpha)"/>
+    <param name="k_beta"  value="$(arg k_beta)"/>
+    <param name="rho_thresh" value="0.001"/>
+    <param name="yaw_thresh" value="0.02"/>
+  </node>-->
+  <!--<node pkg="three_wheel_track"
+        type="lqr_controller_node.py"
+        name="lqr_controller"
+        output="screen">
+    <param name="x_ref"   value="$(arg x_goal)"/>
+    <param name="y_ref"   value="$(arg y_goal)"/>
+    <param name="yaw_ref" value="$(arg yaw_goal)"/>
+
+    <param name="Q_diag" value="[10.0,10.0,1.0]"/>
+    <param name="R_diag" value="[1.0,1.0]"/>
+  </node>-->
+  <node pkg="three_wheel_track"
+        type="mpc_controller_node.py"
+        name="mpc_controller"
+        output="screen">
+    <!-- goal pose -->
+    <param name="x_ref"   value="$(arg x_goal)"/>
+    <param name="y_ref"   value="$(arg y_goal)"/>
+    <param name="yaw_ref" value="$(arg yaw_goal)"/>
+
+    <!-- linearized model (if your MPC needs it) -->
+    <param name="A"      value="[ [1,0,0],[0,1,0],[0,0,1] ]"/>
+    <param name="B"      value="[ [0.1,0],[0,0.1],[0,0.0] ]"/>
+
+    <!-- MPC weights and horizon -->
+    <param name="Q_diag" value="[10.0,10.0,1.0]"/>
+    <param name="R_diag" value="[1.0,1.0]"/>
+    <param name="N"      value="15"/>
+  </node>
+
+  <!--——————————————————————————————————————————————————————————————————————-->
+</launch>

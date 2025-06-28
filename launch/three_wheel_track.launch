@@ -1,0 +1,17 @@
+<launch>
+  <!-- 1. Start Gazebo -->
+  <include file="$(find gazebo_ros)/launch/empty_world.launch"/>
+
+  <!-- 2. Load robot description -->
+  <param name="robot_description"
+         command="$(find xacro)/xacro '$(find three_wheel_track)/urdf/three_wheel_robot.urdf.xacro'"/>
+
+  <!-- 3. Spawn the robot -->
+  <node pkg="gazebo_ros" type="spawn_model" name="spawn_bot"
+        args="-param robot_description -urdf -model three_wheel_bot"/>
+
+  <!-- 4. Start your controller node -->
+  <node pkg="three_wheel_track" type="kinematic_controller.py"
+        name="kinematic_controller" output="screen"/>
+  <!-- you can add LQR and MPC nodes here if you’ve ported them -->
+</launch>
