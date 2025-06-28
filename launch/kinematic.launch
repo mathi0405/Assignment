@@ -1,0 +1,37 @@
+<launch>
+  <!--——————————————————————————————————————————————————————————————————————-->
+  <!-- 1) User-configurable arguments (goal pose & controller gains) -->
+  <arg name="x_goal"   default="0.0"/>
+  <arg name="y_goal"   default="1.0"/>
+  <arg name="yaw_goal" default="3.1416"/>
+
+  <arg name="k_rho"    default="0.5"/>
+  <arg name="k_alpha"  default="1.5"/>
+  <arg name="k_beta"   default="-0.3"/>
+  <!--——————————————————————————————————————————————————————————————————————-->
+  <!-- Start Gazebo with sim time -->
+  <include file="$(find gazebo_ros)/launch/empty_world.launch">
+    <arg name="use_sim_time" value="true"/>
+  </include>
+  <param name="use_sim_time" value="true"/>
+
+  <!-- Robot Xacro -->
+  <param name="robot_description"
+         command="$(find xacro)/xacro '$(find three_wheel_track)/urdf/three_wheel_robot.urdf.xacro'"/>
+
+  <!-- Spawn robot -->
+  <node pkg="gazebo_ros" type="spawn_model" name="spawn_bot" output="screen"
+        args="-param robot_description -urdf -model three_wheel_bot -x 0 -y 0 -z 0.1"/>
+
+  <!-- Kinematic node -->
+  <node pkg="three_wheel_track" type="kinematic_controller_node.py" name="kinematic_controller" output="screen">
+    <param name="x_ref"   value="0.0"/>
+    <param name="y_ref"   value="1.0"/>
+    <param name="yaw_ref" value="3.1416"/>
+    <param name="k_rho"   value="0.5"/>
+    <param name="k_alpha" value="1.5"/>
+    <param name="k_beta"  value="-0.3"/>
+    <param name="rho_thresh" value="0.001"/>
+    <param name="yaw_thresh" value="0.02"/>
+  </node>
+</launch>
