@@ -1,0 +1,34 @@
+<launch>
+  <!--——————————————————————————————————————————————————————————————————————-->
+  <!-- 1) User-configurable arguments (goal pose & controller gains) -->
+  <arg name="x_goal"   default="0.0"/>
+  <arg name="y_goal"   default="1.0"/>
+  <arg name="yaw_goal" default="3.1416"/>
+
+  <arg name="k_rho"    default="0.5"/>
+  <arg name="k_alpha"  default="1.5"/>
+  <arg name="k_beta"   default="-0.3"/>
+  <!--——————————————————————————————————————————————————————————————————————-->
+  <include file="$(find gazebo_ros)/launch/empty_world.launch">
+    <arg name="use_sim_time" value="true"/>
+  </include>
+  <param name="use_sim_time" value="true"/>
+
+  <param name="robot_description"
+         command="$(find xacro)/xacro '$(find three_wheel_track)/urdf/three_wheel_robot.urdf.xacro'"/>
+
+  <node pkg="gazebo_ros" type="spawn_model" name="spawn_bot" output="screen"
+        args="-param robot_description -urdf -model three_wheel_bot -x 0 -y 0 -z 0.1"/>
+
+  <node pkg="three_wheel_track" type="mpc_controller_node.py" name="mpc_controller" output="screen">
+    <param name="x_ref"   value="0.0"/>
+    <param name="y_ref"   value="1.0"/>
+    <param name="yaw_ref" value="3.1416"/>
+
+    <param name="A"      value="[ [1,0,0], [0,1,0], [0,0,1] ]"/>
+    <param name="B"      value="[ [0.1,0], [0,0.1], [0,0] ]"/>
+    <param name="Q_diag" value="[10.0,10.0,1.0]"/>
+    <param name="R_diag" value="[1.0,1.0]"/>
+    <param name="N"      value="15"/>
+  </node>
+</launch>
